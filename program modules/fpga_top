@@ -1,1 +1,125 @@
+module fpga_top (
+    input        CLK100MHZ,
+    input  [7:0] SW,
+
+    output [6:0] SEG,
+    output [7:0] AN,
+    output       DP
+);
+
+    // ==========================================
+    // A and B
+    // ==========================================
+
+    wire [3:0] A;
+    wire [3:0] B;
+
+    assign A = SW[3:0];
+    assign B = SW[7:4];
+
+
+    // ==========================================
+    // Multiplier + Binary to BCD
+    // ==========================================
+
+    wire [7:0] product;
+
+    wire [3:0] hundreds;
+    wire [3:0] tens;
+    wire [3:0] ones;
+
+    multiplier_bcd_top #(
+        .N(4)
+    ) dut (
+        .A(A),
+        .B(B),
+        .product(product),
+        .hundreds(hundreds),
+        .tens(tens),
+        .ones(ones)
+    );
+
+
+    // ==========================================
+    // Clock divider
+    // ==========================================
+
+    reg [16:0] counter = 0;
+    reg [1:0] digit_select = 0;
+
+    always @(posedge CLK100MHZ) begin
+
+        if (counter == 17'd99999) begin
+
+            counter <= 0;
+
+            if (digit_select == 2)
+                digit_select <= 0;
+            else
+                digit_select <= digit_select + 1'b1;
+
+        end
+
+        else begin
+            counter <= counter + 1'b1;
+        end
+
+    end
+
+
+    // ==========================================
+    // Select digit
+    // ==========================================
+
+    reg [3:0] current_bcd;
+    reg [7:0] an_reg;
+
+    always @(*) begin
+
+        case (digit_select)
+
+            // Ones
+            2'd0: begin
+                current_bcd = ones;
+                an_reg = 8'b11111110;
+            end
+
+            // Tens
+            2'd1: begin
+                current_bcd = tens;
+                an_reg = 8'b11111101;
+            end
+
+            // Hundreds
+            2'd2: begin
+                current_bcd = hundreds;
+                an_reg = 8'b11111011;
+            end
+
+            default: begin
+                current_bcd = 4'd0;
+                an_reg = 8'b11111111;
+            end
+
+        endcase
+
+    end
+
+
+    assign AN = an_reg;
+
+    // Decimal point OFF
+    assign DP = 1'b1;
+
+
+    // ==========================================
+    // 7-segment decoder
+    // ==========================================
+
+    seven_segment display_inst (
+        .bcd(current_bcd),
+        .seg(SEG)
+    );
+
+endmodule
 
