@@ -15,7 +15,9 @@ Implement the Double Dabble (Shift-and-Add-3) algorithm for BCD conversion.
 Display the decimal result on the Nexys A7 7-segment display.
 Verify the design through simulation and waveform analysis.
 Implement and test the design on real FPGA hardware.
-🏗️ Project Architecture
+
+## 🏗️ Project Architecture
+```text
              ┌──────────────────┐
              │   Input A (N-bit)│
              └────────┬─────────┘
@@ -39,13 +41,14 @@ Implement and test the design on real FPGA hardware.
                       │ BCD Digits
                       ▼
              ┌──────────────────┐
-             │  7-Segment       │
-             │    Display       │
+             │   7-Segment      │
+             │     Display      │
              └──────────────────┘
 
              Input B (N-bit)
                   │
                   └──────► Multiplier
+```
 
 📌 FPGA Constraint Information
 
