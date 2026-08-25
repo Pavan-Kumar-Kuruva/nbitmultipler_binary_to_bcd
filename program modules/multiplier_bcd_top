@@ -1,1 +1,29 @@
+module multiplier_bcd_top #(
+    parameter N = 4
+)(
+    input  [N-1:0] A,
+    input  [N-1:0] B,
 
+    output [2*N-1:0] product,
+
+    output [3:0] hundreds,
+    output [3:0] tens,
+    output [3:0] ones
+);
+
+nbit_multiplier #(
+    .N(N)
+) multiplier_inst (
+    .A(A),
+    .B(B),
+    .P(product)
+);
+
+binary_to_bcd_8bit bcd_inst (
+    .binary(product),
+    .hundreds(hundreds),
+    .tens(tens),
+    .ones(ones)
+);
+
+endmodule
